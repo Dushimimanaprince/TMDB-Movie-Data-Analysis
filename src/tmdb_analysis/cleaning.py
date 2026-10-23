@@ -1,6 +1,7 @@
 """Functions that clean the raw movie data (Step 2 of the brief)."""
 
 import numpy as np
+import pandas as pd
 
 # Columns the brief says to remove
 COLUMNS_TO_DROP = ["adult", "imdb_id", "original_title", "video", "homepage"]
@@ -85,3 +86,41 @@ def flatten_json_columns(df):
 
     df = df.drop(columns=["credits"])
     return df
+
+def convert_dtypes(df):
+    """Make number columns numeric and release_date a real date.
+
+    Values that can't be converted become NaN (errors="coerce").
+    """
+    df = df.copy()
+
+    for column in ["id", "budget", "revenue", "popularity", "runtime", "vote_count", "vote_average"]:
+        df[column] = pd.to_numeric(df[column], errors="coerce")
+
+    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+    return df
+
+
+def replace_zeros_with_nan(df):
+    """A budget, revenue or runtime of 0 means "unknown", so replace it with NaN."""
+    df = df.copy()
+
+    for column in ["budget", "revenue", "runtime"]:
+        df[column] = df[column].replace(0, np.nan)
+
+    return df
+
+
+def convert_to_musd(df):
+    """Add budget_musd and revenue_musd (millions of USD) and remove the raw columns.
+
+    Run this AFTER replace_zeros_with_nan, otherwise an unknown budget
+    becomes 0.0 instead of NaN.
+    """
+    df = df.copy()
+
+    df["budget_musd"] = df["budget"] / 1_000_000
+    df["revenue_musd"] = df["revenue"] / 1_000_000
+
+    df = df.drop(columns=["budget", "revenue"])
+    return df   
