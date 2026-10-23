@@ -57,3 +57,37 @@ def compare_franchise_vs_standalone(df):
         mean_rating=("vote_average", "mean"),
     )
     return result.round(2)
+
+def get_top_franchises(df):
+    """Most successful franchises, ranked by total revenue."""
+    franchises = df[df["belongs_to_collection"].notna()]
+
+    result = franchises.groupby("belongs_to_collection").agg(
+        movies=("id", "count"),
+        total_budget_musd=("budget_musd", "sum"),
+        mean_budget_musd=("budget_musd", "mean"),
+        total_revenue_musd=("revenue_musd", "sum"),
+        mean_revenue_musd=("revenue_musd", "mean"),
+        mean_rating=("vote_average", "mean"),
+    )
+    result = result.sort_values("total_revenue_musd", ascending=False)
+    return result.round(2)
+
+
+def get_top_directors(df):
+    """Most successful directors, ranked by total revenue.
+
+    A movie with two directors ("Anthony Russo|Joe Russo") counts for both of them.
+    """
+    directors = df.copy()
+    directors["director"] = directors["director"].str.split("|")   # text -> list of names
+    directors = directors.explode("director")                       # one row per director
+    directors = directors[directors["director"].notna()]
+
+    result = directors.groupby("director").agg(
+        movies=("id", "count"),
+        total_revenue_musd=("revenue_musd", "sum"),
+        mean_rating=("vote_average", "mean"),
+    )
+    result = result.sort_values("total_revenue_musd", ascending=False)
+    return result.round(2)
