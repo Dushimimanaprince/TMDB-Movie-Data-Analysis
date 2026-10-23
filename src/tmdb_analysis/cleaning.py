@@ -8,6 +8,16 @@ COLUMNS_TO_DROP = ["adult", "imdb_id", "original_title", "video", "homepage"]
 
 # Text that means "no information" in overview and tagline
 TEXT_PLACEHOLDERS = ["", "No Data", "No overview found.", "N/A"]
+
+# The final column order required by the brief
+FINAL_COLUMNS = [
+    "id", "title", "tagline", "release_date", "genres", "belongs_to_collection",
+    "original_language", "budget_musd", "revenue_musd", "production_companies",
+    "production_countries", "vote_count", "vote_average", "popularity", "runtime",
+    "overview", "spoken_languages", "poster_path", "cast", "cast_size", "director",
+    "crew_size",
+]
+
 # Columns that hold a list like [{"name": "Action"}, {"name": "Drama"}]
 LIST_COLUMNS = ["genres", "spoken_languages", "production_countries", "production_companies"]
 
@@ -142,4 +152,21 @@ def replace_text_placeholders(df):
         df[column] = df[column].str.strip()  # "   " becomes "", which is a placeholder
         df[column] = df[column].replace(TEXT_PLACEHOLDERS, np.nan)
 
+    return df
+
+def remove_bad_rows(df):
+    """Remove duplicates, rows without id or title, rows with too little data,
+    and movies that are not released yet."""
+    df = df.drop_duplicates(subset="id")
+    df = df.dropna(subset=["id", "title"])
+    df = df.dropna(thresh=10)                # keep rows with at least 10 non-NaN values
+    df = df[df["status"] == "Released"]
+    df = df.drop(columns=["status"])
+    return df
+
+
+def finalize_columns(df):
+    """Put the columns in the order the brief asks for and reset the index."""
+    df = df[FINAL_COLUMNS]                   # raises an error if a column is missing
+    df = df.reset_index(drop=True)
     return df
