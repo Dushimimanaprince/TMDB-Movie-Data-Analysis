@@ -1,5 +1,5 @@
 """Search queries (Step 3.2) and franchise / director analysis (Steps 3.3-3.5)."""
-
+import numpy as np
 
 def contains_all(text, items):
     """Return True if every item is one of the values in a pipe-separated text.
@@ -35,3 +35,25 @@ def search_uma_thurman_tarantino(df):
     result = df[has_uma_thurman & by_tarantino]
     result = result.sort_values("runtime", ascending=True)
     return result[["title", "runtime", "director"]]
+
+def add_franchise_status(df):
+    """Add a column: "Franchise" if the movie belongs to a collection, otherwise "Standalone"."""
+    df = df.copy()
+    df["franchise_status"] = np.where(df["belongs_to_collection"].isna(), "Standalone", "Franchise")
+    return df
+
+
+def compare_franchise_vs_standalone(df):
+    """Compare franchise and standalone movies on the 5 metrics from the brief.
+
+    ROI uses the median because one very successful movie can pull the mean up a lot.
+    """
+    result = df.groupby("franchise_status").agg(
+        movies=("id", "count"),
+        mean_revenue_musd=("revenue_musd", "mean"),
+        median_roi=("roi", "median"),
+        mean_budget_musd=("budget_musd", "mean"),
+        mean_popularity=("popularity", "mean"),
+        mean_rating=("vote_average", "mean"),
+    )
+    return result.round(2)
