@@ -258,3 +258,5 @@ Each small chart compares the two groups on one metric. They are drawn separatel
 | seaborn missing from `requirements.txt`, versions not pinned | Removed seaborn (Matplotlib only, as the brief says) and pinned all versions |
 | Notebook not run top to bottom | Rebuilt so it runs cleanly with Restart & Run All |
 | API client had no timeout, retry or 404 handling | Added a timeout, retries and separate handling for 404 and 401 |
+
+For a summary of the findings, see [REPORT.md](REPORT.md).
