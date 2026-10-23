@@ -9,6 +9,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "movies_raw.json"
 CLEAN_DATA_PATH = PROJECT_ROOT / "data" / "processed" / "tmdb_movies_clean.csv"
+RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "movies_raw.json"
+CLEAN_DATA_PATH = PROJECT_ROOT / "data" / "processed" / "tmdb_movies_clean.csv"
+FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 
 # ---------------- Movie IDs ----------------
 # The IDs required by the lab brief.
