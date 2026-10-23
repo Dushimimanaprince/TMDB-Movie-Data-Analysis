@@ -6,6 +6,8 @@ import pandas as pd
 # Columns the brief says to remove
 COLUMNS_TO_DROP = ["adult", "imdb_id", "original_title", "video", "homepage"]
 
+# Text that means "no information" in overview and tagline
+TEXT_PLACEHOLDERS = ["", "No Data", "No overview found.", "N/A"]
 # Columns that hold a list like [{"name": "Action"}, {"name": "Drama"}]
 LIST_COLUMNS = ["genres", "spoken_languages", "production_countries", "production_companies"]
 
@@ -124,3 +126,20 @@ def convert_to_musd(df):
 
     df = df.drop(columns=["budget", "revenue"])
     return df   
+
+def fix_zero_votes(df):
+    """If nobody voted, the vote_average means nothing, so make it NaN."""
+    df = df.copy()
+    df.loc[df["vote_count"] == 0, "vote_average"] = np.nan
+    return df
+
+
+def replace_text_placeholders(df):
+    """Replace placeholder text like "No Data" in overview and tagline with NaN."""
+    df = df.copy()
+
+    for column in ["overview", "tagline"]:
+        df[column] = df[column].str.strip()  # "   " becomes "", which is a placeholder
+        df[column] = df[column].replace(TEXT_PLACEHOLDERS, np.nan)
+
+    return df
